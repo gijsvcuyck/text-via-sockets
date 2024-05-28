@@ -1,5 +1,6 @@
 .stack-work/
 *.cabal
+!/copied_dependencies/NoTrace-0.3.0.4/NoTrace.cabal
 *~
 *.class
 TAGS

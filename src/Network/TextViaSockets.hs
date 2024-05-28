@@ -49,7 +49,6 @@ import           Control.Exception.Base
 import           Data.Foldable
 import           Control.Retry
 import           Control.Monad.Catch (Handler)
-import           Data.Monoid
     
 #ifdef DEBUG
 import           Debug.Trace
@@ -105,11 +104,24 @@ retryCnect act = recovering connectRetryPolicy [ioExceptionHandler] (const act)
 -- reached.
 acceptOn :: PortNumber -> IO Connection
 acceptOn p = retryCnect $ do
-    sock <- socket AF_INET Stream 0
+    addr <- resolvePort p
+    sock <- socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr)
     traceIO $ "TextViaSockets: Accepting a connection on port " ++ show p
     setSocketOption sock ReuseAddr 1
-    bind sock (SockAddrInet p iNADDR_ANY)
+    bind sock (addrAddress addr)
     acceptOnSocket sock
+        
+-- | Resolves a portnumber to the SockAddr object needed for many functions from the Network.Socket library
+--   Implementation is based on example code from the Network.Socket library.
+resolvePort :: PortNumber -> IO AddrInfo
+resolvePort port = do
+    let hints = defaultHints {
+                addrFamily = AF_INET
+              , addrSocketType = Stream
+              }
+    addr:_ <- getAddrInfo (Just hints) Nothing (Just $ show port)
+    return addr
+
 
 -- | Like @acceptOn@ but it takes a bound socket as parameter.
 acceptOnSocket :: Socket -> IO Connection
@@ -126,9 +138,10 @@ acceptOnSocket sock = retryCnect $ do
 -- | Get a free socket from the operating system.
 getFreeSocket :: IO Socket
 getFreeSocket = retryCnect $ do
-    sock <- socket AF_INET Stream 0
+    addr <- resolvePort defaultPort
+    sock <- socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr)
     setSocketOption sock ReuseAddr 1
-    bind sock (SockAddrInet aNY_PORT iNADDR_ANY)
+    bind sock (addrAddress addr)
     return sock
 
 -- | Connect to the given host and service name (usually a port number).
