@@ -4,6 +4,7 @@ module Network.TextViaSocketsSpec (spec) where
 import           Control.Concurrent
 import           Data.Text (Text)
 import           Network.Socket hiding (close)
+import qualified Network.Socket (close)
 import           Control.Exception.Base hiding (assert)
 import           Control.Concurrent.Async
 import           qualified Data.Text as T
@@ -149,3 +150,14 @@ spec = do
             close svrConn
             close svrConn
             close cliConn
+    describe "Creating:" $ do
+        it "multiple sockets can be created" $ do
+            sock1 <- getFreeSocket
+            sock2 <- getFreeSocket
+            (SockAddrInet port1 host1) <- getSocketName sock1
+            (SockAddrInet port2 host2) <- getSocketName sock2
+            (port1,port2,host1,host2) `shouldSatisfy` (\(p1,p2,h1,h2)-> p1 /= p2 || h1 /= h2)
+            print (port1,port2,host1,host2)
+            Network.Socket.close sock1
+            Network.Socket.close sock2
+

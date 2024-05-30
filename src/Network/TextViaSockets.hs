@@ -32,7 +32,6 @@ module Network.TextViaSockets
     ) where
 
 import           Network.Socket hiding (recv, close, send)
-import qualified Network.Socket as Socket
 import           Network.Socket.ByteString
 import           Data.Text (Text)
 import qualified Data.Text as T
@@ -252,21 +251,11 @@ close :: Connection -> IO ()
 close Connection{connSock, serverSock, socketReaderTid} = tryClose `catch` handler
     where
       tryClose = do          
-          closeIfOpen connSock
+          close' connSock
           traceIO $ "TextViaSockets: Closing server socket " ++ show serverSock
-          traverse_ closeIfOpen serverSock
+          traverse_ close' serverSock
           killThread socketReaderTid
           traceIO "TextViaSockets: Connection closed"
-      closeIfOpen sock = do
-          let MkSocket _ _ _ _ stMV = sock
-          st <- readMVar stMV
-          case st of
-              Closed -> return ()
-              _ -> do
-                  pn <- socketPort sock
-                  traceIO $ "TextViaSockets: Closing connection on " ++ show pn
-                      ++ " (" ++ show sock ++ ")"
-                  Socket.close sock
       handler :: IOException -> IO ()
       handler ex = do
           traceIO $ "TextViaSockets: exception while closing the socket: "
