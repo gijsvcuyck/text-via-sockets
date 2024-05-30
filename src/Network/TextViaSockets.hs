@@ -31,8 +31,7 @@ module Network.TextViaSockets
     , close
     ) where
 
-import           Network.Socket hiding (recv, close, send)
-import qualified Network.Socket as Socket
+import           Network.Socket hiding (close)
 import           Network.Socket.ByteString
 import           Data.Text (Text)
 import qualified Data.Text as T
@@ -49,7 +48,6 @@ import           Control.Exception.Base
 import           Data.Foldable
 import           Control.Retry
 import           Control.Monad.Catch (Handler)
-import           Data.Monoid
     
 #ifdef DEBUG
 import           Debug.Trace
@@ -105,11 +103,24 @@ retryCnect act = recovering connectRetryPolicy [ioExceptionHandler] (const act)
 -- reached.
 acceptOn :: PortNumber -> IO Connection
 acceptOn p = retryCnect $ do
-    sock <- socket AF_INET Stream 0
+    addr <- resolvePort p
+    sock <- socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr)
     traceIO $ "TextViaSockets: Accepting a connection on port " ++ show p
     setSocketOption sock ReuseAddr 1
-    bind sock (SockAddrInet p iNADDR_ANY)
+    bind sock (addrAddress addr)
     acceptOnSocket sock
+        
+-- | Resolves a portnumber to the SockAddr object needed for many functions from the Network.Socket library
+--   Implementation is based on example code from the Network.Socket library.
+resolvePort :: PortNumber -> IO AddrInfo
+resolvePort port = do
+    let hints = defaultHints {
+                addrFamily = AF_INET
+              , addrSocketType = Stream
+              }
+    addr:_ <- getAddrInfo (Just hints) Nothing (Just $ show port)
+    return addr
+
 
 -- | Like @acceptOn@ but it takes a bound socket as parameter.
 acceptOnSocket :: Socket -> IO Connection
@@ -126,9 +137,10 @@ acceptOnSocket sock = retryCnect $ do
 -- | Get a free socket from the operating system.
 getFreeSocket :: IO Socket
 getFreeSocket = retryCnect $ do
-    sock <- socket AF_INET Stream 0
+    addr <- resolvePort defaultPort
+    sock <- socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr)
     setSocketOption sock ReuseAddr 1
-    bind sock (SockAddrInet aNY_PORT iNADDR_ANY)
+    bind sock (addrAddress addr)
     return sock
 
 -- | Connect to the given host and service name (usually a port number).
@@ -239,21 +251,11 @@ close :: Connection -> IO ()
 close Connection{connSock, serverSock, socketReaderTid} = tryClose `catch` handler
     where
       tryClose = do          
-          closeIfOpen connSock
+          close' connSock
           traceIO $ "TextViaSockets: Closing server socket " ++ show serverSock
-          traverse_ closeIfOpen serverSock
+          traverse_ close' serverSock
           killThread socketReaderTid
           traceIO "TextViaSockets: Connection closed"
-      closeIfOpen sock = do
-          let MkSocket _ _ _ _ stMV = sock
-          st <- readMVar stMV
-          case st of
-              Closed -> return ()
-              _ -> do
-                  pn <- socketPort sock
-                  traceIO $ "TextViaSockets: Closing connection on " ++ show pn
-                      ++ " (" ++ show sock ++ ")"
-                  Socket.close sock
       handler :: IOException -> IO ()
       handler ex = do
           traceIO $ "TextViaSockets: exception while closing the socket: "
