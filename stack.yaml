@@ -41,7 +41,7 @@ packages:
 extra-deps:
 - copied_dependencies/NoTrace-0.3.0.4
 - MissingH-1.5.0.1
-- network-2.8.0.1
+# - network-2.8.0.1
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 # extra-deps: []

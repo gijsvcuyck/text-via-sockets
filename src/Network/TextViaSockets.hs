@@ -31,7 +31,7 @@ module Network.TextViaSockets
     , close
     ) where
 
-import           Network.Socket hiding (recv, close, send)
+import           Network.Socket hiding (close)
 import           Network.Socket.ByteString
 import           Data.Text (Text)
 import qualified Data.Text as T

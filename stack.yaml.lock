@@ -11,13 +11,6 @@ packages:
       size: 5272
   original:
     hackage: MissingH-1.5.0.1
-- completed:
-    hackage: network-2.8.0.1@sha256:a79f3cf88b2623d5f2e7a8fc7962055f6858d6beb6d13c2aef43c20a5060cf28,3034
-    pantry-tree:
-      sha256: 151e632248940bc4cd9e9ee420c8026ab6f2e3315139c32116ca083c60382b67
-      size: 2488
-  original:
-    hackage: network-2.8.0.1
 snapshots:
 - completed:
     sha256: 428ec8d5ce932190d3cbe266b9eb3c175cd81e984babf876b64019e2cbe4ea68
