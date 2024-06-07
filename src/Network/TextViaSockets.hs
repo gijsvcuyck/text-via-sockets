@@ -18,6 +18,9 @@ module Network.TextViaSockets
     ( Connection ()
     -- * Connect to a server
     , connectTo
+    -- * Same as connectTo, 
+    -- but only creates the socket without setting up a connection
+    , connectToSocket
     -- * Start a server
     , acceptOn
     , acceptOnSocket
@@ -149,7 +152,18 @@ getFreeSocket = retryCnect $ do
 -- an exponential back-off strategy, until the maximum number of tries is
 -- reached.
 connectTo :: HostName -> ServiceName -> IO Connection
-connectTo hn sn = withSocketsDo $ retryCnect $ do
+connectTo hn sn = do
+    sock <-connectToSocket hn sn
+    mkConnection sock Nothing
+
+
+-- | Connect to the given host and service name (usually a port number).
+--
+-- If the connection cannot be established, this action will be retried using
+-- an exponential back-off strategy, until the maximum number of tries is
+-- reached.
+connectToSocket :: HostName -> ServiceName -> IO Socket
+connectToSocket hn sn =  withSocketsDo $ retryCnect $ do
     -- Open the socket.
     traceIO $ "TextViaSockets: Connecting to " ++ show hn' ++ " on " ++ show sn
     addrinfos <- getAddrInfo Nothing (Just hn') (Just sn)
@@ -159,7 +173,7 @@ connectTo hn sn = withSocketsDo $ retryCnect $ do
     pn <- socketPort sock
     traceIO $ "TextViaSockets: Connected to " ++ show hn' ++ " on " ++ show pn
         ++ " (" ++ show sock ++ ")"
-    mkConnection sock Nothing
+    return sock
     where
       -- Replace "localhost" to prevent errors on Windows systems where
       -- "localhost" does not resolve to "127.0.0.1"
