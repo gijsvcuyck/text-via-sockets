@@ -52,7 +52,7 @@ import           Control.Monad.Catch (Handler)
 #ifdef DEBUG
 import           Debug.Trace
 #else
-import           Debug.NoTrace
+import           Copied_dependencies.Debug.NoTrace
 #endif
 
 -- | A connection for sending and receiving @Text@ lines.

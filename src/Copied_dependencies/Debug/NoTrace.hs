@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Debug.NoTrace
+-- Module      :  Copied_dependencies.Debug.NoTrace
 -- Copyright   :  (c) Cindy Wang (CindyLinz) 2013
 -- License     :  MIT
 -- 
@@ -20,15 +20,15 @@
 --
 -- And after you finish the debugging process, just change the line
 --
--- > import Debug.Trace
+-- > import Copied_dependencies.Debug.Trace
 --
 -- into
 --
--- > import Debug.NoTrace
+-- > import Copied_dependencies.Debug.NoTrace
 --
 -- Then all the tracing functions are silently removed.
 -------------------------------------------------------------------------------
-module Debug.NoTrace where
+module Copied_dependencies.Debug.NoTrace where
 
 trace :: String -> a -> a
 trace _ = id

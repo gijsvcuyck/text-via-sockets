@@ -19,7 +19,7 @@ import           Network.TextViaSockets
 #ifdef DEBUG
 import Debug.Trace
 #else
-import Debug.NoTrace
+import Copied_dependencies.Debug.NoTrace
 #endif
 
 -- | Timeout token.
