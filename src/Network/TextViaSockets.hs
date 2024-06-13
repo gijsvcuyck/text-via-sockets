@@ -22,6 +22,7 @@ module Network.TextViaSockets
     -- but only creates the socket without setting up a connection
     , connectToSocket
     -- * Start a server
+    , listenOn
     , acceptOn
     , acceptOnSocket
     , getFreeSocket
@@ -116,7 +117,7 @@ acceptOn p = retryCnect $ do
 -- | Accept byte-streams by serving on the given port number. 
 -- This function will start listening, but will not block.
 listenOn :: PortNumber -> IO Socket
-listenOn p = 
+listenOn p = do
     addr <- resolvePort p
     sock <- socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr)
     traceIO $ "TextViaSockets: Accepting a connection on port " ++ show p
