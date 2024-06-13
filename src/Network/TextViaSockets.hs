@@ -112,6 +112,19 @@ acceptOn p = retryCnect $ do
     setSocketOption sock ReuseAddr 1
     bind sock (addrAddress addr)
     acceptOnSocket sock
+
+-- | Accept byte-streams by serving on the given port number. 
+-- This function will start listening, but will not block.
+listenOn :: PortNumber -> IO Socket
+listenOn p = 
+    addr <- resolvePort p
+    sock <- socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr)
+    traceIO $ "TextViaSockets: Accepting a connection on port " ++ show p
+    setSocketOption sock ReuseAddr 1
+    bind sock (addrAddress addr)
+    listen sock 1 -- Only one queued connection.
+    return sock
+
         
 -- | Resolves a portnumber to the SockAddr object needed for many functions from the Network.Socket library
 --   Implementation is based on example code from the Network.Socket library.
