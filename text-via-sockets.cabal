@@ -1,0 +1,119 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.2.
+--
+-- see: https://github.com/sol/hpack
+
+name:           text-via-sockets
+version:        0.1.1.0
+synopsis:       Send and receive text lines using sockets.
+description:    Please see the README on Github at <https://github.com/capitanbatata/text-via-sockets#readme>
+category:       Network
+homepage:       https://github.com/capitanbatata/text-via-sockets#readme
+bug-reports:    https://github.com/capitanbatata/text-via-sockets/issues
+author:         Damian Nadales
+maintainer:     damian.nadales@gmail.com
+copyright:      Copyright: (c) 2017 Damian Nadales
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/capitanbatata/text-via-sockets
+
+flag debug
+  description: Enable debug
+  manual: True
+  default: False
+
+library
+  exposed-modules:
+      Copied_dependencies.Debug.NoTrace
+      Network.TextViaSockets
+  other-modules:
+      Paths_text_via_sockets
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+  ghc-options: -O -Werror -Wall
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , exceptions
+    , network
+    , retry
+    , stm
+    , text
+  default-language: Haskell2010
+  if flag(debug)
+    cpp-options: -DDEBUG
+
+test-suite no-resources-leak-test
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Paths_text_via_sockets
+  hs-source-dirs:
+      test/endurance/no-resources-leak
+  default-extensions:
+      OverloadedStrings
+  ghc-options: -O -Werror -Wall -threaded -rtsopts -with-rtsopts=-N -with-rtsopts=-T -Werror -Wall -O
+  build-depends:
+      async
+    , base >=4.7 && <5
+    , ekg
+    , network
+    , text-via-sockets
+  default-language: Haskell2010
+  if flag(debug)
+    cpp-options: -DDEBUG
+
+test-suite text-via-sockets-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Network.TextViaSocketsSpec
+      Paths_text_via_sockets
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+  ghc-options: -O -Werror -Wall -threaded -rtsopts -with-rtsopts=-N -Werror -Wall -O
+  build-depends:
+      QuickCheck
+    , async
+    , base >=4.7 && <5
+    , hspec
+    , network
+    , quickcheck-text
+    , text
+    , text-via-sockets
+  default-language: Haskell2010
+  if flag(debug)
+    cpp-options: -DDEBUG
+
+benchmark text-via-sockets-bench
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Paths_text_via_sockets
+  hs-source-dirs:
+      bench
+  default-extensions:
+      OverloadedStrings
+  ghc-options: -O -Werror -Wall -threaded -rtsopts -with-rtsopts=-N -Werror -Wall -O
+  build-depends:
+      async
+    , base >=4.7 && <5
+    , criterion
+    , network
+    , text
+    , text-via-sockets
+  default-language: Haskell2010
+  if flag(debug)
+    cpp-options: -DDEBUG
